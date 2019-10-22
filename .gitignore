@@ -1,0 +1,35 @@
+# Untracked .sgit folder 
+.sgit/
+
+# sbt
+# (may want to keep parts of 'project')
+bin/
+target/
+build/
+
+# eclipse
+build
+.classpath
+.project
+.settings
+.worksheet
+
+# intellij idea
+*.log
+*.iml
+*.ipr
+*.iws
+.idea
+
+# mac
+.DS_Store
+
+# other?
+.history
+.scala_dependencies
+.cache
+.cache-main
+.metals
+.bloop
+#general
+*.class
