@@ -6,8 +6,9 @@ object ETL {
 
   def cleaningProcess(df: DataFrame): DataFrame = {
     val appOrSiteCleaned = cleanAppOrSite(df)
-    val oscleaned = cleanOS(appOrSiteCleaned)
-    oscleaned
+    //val oscleaned = cleanOS(df)
+    //oscleaned
+    appOrSiteCleaned
   }
 
 //  ==== Cleaning process for appOrSite Column ====
@@ -25,6 +26,7 @@ object ETL {
   // ==== Cleaning OS ====
 
   def cleanOS(df: DataFrame): DataFrame = {
+
     val transformUDF = udf { os: String =>
       if (os.toLowerCase() == "android") 1.0
       else if (os.toLowerCase() == "ios") 2.0
