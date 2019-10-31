@@ -5,10 +5,10 @@ import org.apache.spark.sql.functions.udf
 object ETL {
 
   def cleaningProcess(df: DataFrame): DataFrame = {
-    val appOrSiteCleaned = cleanAppOrSite(df)
-    //val oscleaned = cleanOS(df)
-    //oscleaned
-    appOrSiteCleaned
+    // val appOrSiteCleaned = cleanAppOrSite(df)
+    val oscleaned = cleanOS(df)
+    oscleaned
+    // appOrSiteCleaned
   }
 
 //  ==== Cleaning process for appOrSite Column ====
@@ -28,6 +28,7 @@ object ETL {
   def cleanOS(df: DataFrame): DataFrame = {
 
     val transformUDF = udf { os: String =>
+      println(os)
       if (os.toLowerCase() == "android") 1.0
       else if (os.toLowerCase() == "ios") 2.0
       else if (os == "WindowsMobile" || os == "Windows Mobile OS" || os == "WindowsPhone" || os == "Windows Phone OS")
