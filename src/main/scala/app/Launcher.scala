@@ -24,5 +24,6 @@ object Launcher extends App {
   // Calc the ratio for each label :
   // val model = new Model(newDf)
   Model.createModel(newDf)
+  spark.close()
 
 }

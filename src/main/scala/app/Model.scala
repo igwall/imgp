@@ -92,7 +92,7 @@ object Model {
     var newdf = df
 
     cols.foreach { col =>
-      val si = new StringIndexer().setInputCol(col).setOutputCol(col + "Indexed").setHandleInvalid("skip")
+      val si = new StringIndexer().setInputCol(col).setOutputCol(col + "Indexed").setHandleInvalid("keep")
 
       val sm: StringIndexerModel = si.fit(newdf)
       val indexed = sm.transform(newdf).drop(col)

@@ -14,7 +14,8 @@ object ETL {
     val typeCleaned = cleanType(publishCleaned)
     val userCleaned = cleanUser(typeCleaned)
     val labelCleaned = cleanLabel(userCleaned)
-    labelCleaned
+    val bidfloorCleaned = cleanBidfloor(labelCleaned)
+    bidfloorCleaned
   }
 
 //  ==== Cleaning process for appOrSite Column ====
@@ -100,5 +101,9 @@ object ETL {
       else 0.0
     }
     df.withColumn("label", transformUDF(df.col("label")))
+  }
+
+  def cleanBidfloor(df: DataFrame): DataFrame = {
+    df.na.fill(0, Seq("bidfloor"))
   }
 }
