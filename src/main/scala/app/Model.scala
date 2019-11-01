@@ -17,26 +17,29 @@ class Model(df: DataFrame) {
     // We create a column with all the ratio for each line
     val dfWithRatio = df.withColumn("ratio", createRatioColumn(df.col("label")))
 
+
+    val dfWithIndexed: DataFrame = indexStringColumns(dfWithRatio, List("appOrSite", "os", "network", "exchange", "interests", "media", "publisher", "size", "type", "user"))
+
     // Create a vector with our values  :
     val vector: VectorAssembler = new VectorAssembler()
       .setInputCols(
         Array(
-          "appOrSite",
+          "appOrSiteIndexed",
           "bidfloor",
-          "exchange",
-          "media",
-          "network",
-          "os",
-          "publisher",
-          "size",
-          "user"
+          "exchangeIndexed",
+          "mediaIndexed",
+          "networkIndexed",
+          "osIndexed",
+          "publisherIndexed",
+          "sizeIndexed",
+          "userIndexed"
         )
       )
       .setOutputCol("features")
 
     // WE split our DF for training
     val splitDataFrame: Array[DataFrame] =
-      dfWithRatio.randomSplit(Array(0.7, 0.3)) // Need to be confirmed ?
+      dfWithIndexed.randomSplit(Array(0.7, 0.3)) // Need to be confirmed ?
     var training: DataFrame = splitDataFrame(0)
     var testing: DataFrame = splitDataFrame(1)
 
@@ -71,16 +74,30 @@ class Model(df: DataFrame) {
   val ratioValue: Double = getRatio()
 
   def getRatio(): Double = {
-    val labelFalse = df.filter(df("label") === false).count
+    val labelFalse = df.filter(df("label") === 0.0).count
     val totalLabel = df.count
     ((totalLabel - labelFalse).toDouble / totalLabel)
   }
 
   val createRatioColumn = {
-    udf { label: Boolean =>
-      if (label) ratioValue
+    udf { label: Double =>
+      if (label == 1.0) ratioValue
       else 1.0 - ratioValue
     }
+  }
+
+
+  def indexStringColumns(df: DataFrame, cols: List[String]): DataFrame = {
+    var newdf = df
+
+    cols.foreach { col =>
+      val si = new StringIndexer().setInputCol(col).setOutputCol(col + "Indexed")
+
+      val sm: StringIndexerModel = si.fit(newdf)
+      val indexed = sm.transform(newdf).drop(col)
+      newdf = indexed
+    }
+    newdf
   }
 
 }

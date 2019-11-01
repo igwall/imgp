@@ -13,7 +13,8 @@ object ETL {
     val publishCleaned = cleanPublisher(sizeCleaned)
     val typeCleaned = cleanType(publishCleaned)
     val userCleaned = cleanUser(typeCleaned)
-    userCleaned
+    val labelCleaned = cleanLabel(userCleaned)
+    labelCleaned
   }
 
 //  ==== Cleaning process for appOrSite Column ====
@@ -91,5 +92,13 @@ object ETL {
       else user
     }
     df.withColumn("user", transformUDF(df.col("user")))
+  }
+
+  def cleanLabel(df: DataFrame): DataFrame = {
+    val transformUDF = udf { label: Boolean =>
+      if (label) 1.0
+      else 0.0
+    }
+    df.withColumn("label", transformUDF(df.col("label")))
   }
 }
