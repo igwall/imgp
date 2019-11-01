@@ -15,7 +15,7 @@ object Model {
   def createModel(df: DataFrame) = {
 
     // We create a column with all the ratio for each line
-    val dfWithRatio = df.withColumn("ratio", createRatioColumn(df)(df.col("label")))
+    val dfWithRatio = df.withColumn("ratio", createRatioColumn(df))
 
 
     val dfWithIndexed: DataFrame = indexStringColumns(dfWithRatio, List("appOrSite", "os", "network", "exchange", "interests", "media", "publisher", "size", "type", "user"))
@@ -74,17 +74,17 @@ object Model {
   val ratioValue = (df: DataFrame) => getRatio(df)
 
   def getRatio(df: DataFrame): Double = {
-    // val labelFalse = df.filter(df("label") === 0.0).count
-    // val totalLabel = df.count
-    // ((totalLabel - labelFalse).toDouble / totalLabel)
-    0.25
+    val labelFalse = df.filter(df("label") === 0.0).count
+    val totalLabel = df.count
+    ((totalLabel - labelFalse).toDouble / totalLabel)
   }
-
-  val createRatioColumn = (df: DataFrame) => {
-    udf { label: Double =>
-      if (label == 1.0) ratioValue(df)
-      else 1.0 - ratioValue(df)
+  def createRatioColumn(df: DataFrame) = {
+    val ratio = ratioValue(df)
+    val transformUDF = udf { label: Double =>
+      if (label == 1.0) ratio
+      else 1 - ratio
     }
+    transformUDF(df.col("label"))
   }
 
 
