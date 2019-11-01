@@ -1,5 +1,4 @@
 package app
-
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.{DataFrame, Row, SQLContext, SparkSession}
@@ -18,7 +17,12 @@ object Launcher extends App {
   val rawData: DataFrame = spark.read.json("src/data/small.json")
 
   // ETL PROCESS
-  val appOrSite = rawData.select("os")
   val newDf = ETL.cleaningProcess(rawData)
-  println(newDf.select("os").show(100))
+
+  // ===== Create the model : =====
+
+  // Calc the ratio for each label :
+  val model = new Model(newDf)
+  model.createModel()
+
 }
