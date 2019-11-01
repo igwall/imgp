@@ -22,7 +22,7 @@ object Launcher extends App {
   // ===== Create the model : =====
 
   // Calc the ratio for each label :
-  val model = new Model(newDf)
-  model.createModel()
+  // val model = new Model(newDf)
+  Model.createModel(newDf)
 
 }

@@ -10,12 +10,12 @@ import org.apache.spark.ml.classification.{
 }
 import org.apache.spark.ml.feature._
 
-class Model(df: DataFrame) {
+object Model {
 
-  def createModel() = {
+  def createModel(df: DataFrame) = {
 
     // We create a column with all the ratio for each line
-    val dfWithRatio = df.withColumn("ratio", createRatioColumn(df.col("label")))
+    val dfWithRatio = df.withColumn("ratio", createRatioColumn(df)(df.col("label")))
 
 
     val dfWithIndexed: DataFrame = indexStringColumns(dfWithRatio, List("appOrSite", "os", "network", "exchange", "interests", "media", "publisher", "size", "type", "user"))
@@ -71,18 +71,19 @@ class Model(df: DataFrame) {
   }
 
   // Check the value of ratio of true values
-  val ratioValue: Double = getRatio()
+  val ratioValue = (df: DataFrame) => getRatio(df)
 
-  def getRatio(): Double = {
-    val labelFalse = df.filter(df("label") === 0.0).count
-    val totalLabel = df.count
-    ((totalLabel - labelFalse).toDouble / totalLabel)
+  def getRatio(df: DataFrame): Double = {
+    // val labelFalse = df.filter(df("label") === 0.0).count
+    // val totalLabel = df.count
+    // ((totalLabel - labelFalse).toDouble / totalLabel)
+    0.25
   }
 
-  val createRatioColumn = {
+  val createRatioColumn = (df: DataFrame) => {
     udf { label: Double =>
-      if (label == 1.0) ratioValue
-      else 1.0 - ratioValue
+      if (label == 1.0) ratioValue(df)
+      else 1.0 - ratioValue(df)
     }
   }
 
@@ -91,7 +92,7 @@ class Model(df: DataFrame) {
     var newdf = df
 
     cols.foreach { col =>
-      val si = new StringIndexer().setInputCol(col).setOutputCol(col + "Indexed")
+      val si = new StringIndexer().setInputCol(col).setOutputCol(col + "Indexed").setHandleInvalid("skip")
 
       val sm: StringIndexerModel = si.fit(newdf)
       val indexed = sm.transform(newdf).drop(col)
