@@ -9,7 +9,7 @@ object Launcher extends App {
   // Load data here :
   val spark =
     SparkSession.builder
-      .master("local[*]")
+      .config("spark.master", "local")
       .appName("imgp")
       .getOrCreate()
   spark.sparkContext.setLogLevel("ERROR")
@@ -18,7 +18,7 @@ object Launcher extends App {
   val rawData: DataFrame = spark.read.json("src/data/data-students.json")
 
   // ETL PROCESS
-  val newDf = ETL.cleaningProcess(rawData)
+  val newDf = ETL.cleaningProcess(rawData, true)
   // ===== Create the model : =====
 
   // Calc the ratio for each label :

@@ -6,7 +6,7 @@ import org.apache.spark.ml.feature.StringIndexer
 import org.apache.spark.sql.types.IntegerType
 object ETL {
 
-  def cleaningProcess(df: DataFrame): DataFrame = {
+  def cleaningProcess(df: DataFrame, training: Boolean): DataFrame = {
     var newdf = df
     newdf = cleanNullableValues(newdf)
     newdf = cleanAppOrSite(newdf)
@@ -15,7 +15,10 @@ object ETL {
     newdf = cleanPublisher(newdf)
     newdf = cleanType(newdf)
     newdf = cleanUser(newdf)
-    newdf = cleanLabel(newdf)
+    if (training) {
+      newdf = cleanLabel(newdf)
+    }
+
     newdf
   }
 
