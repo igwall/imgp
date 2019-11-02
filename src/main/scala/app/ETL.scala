@@ -7,15 +7,26 @@ import org.apache.spark.sql.types.IntegerType
 object ETL {
 
   def cleaningProcess(df: DataFrame): DataFrame = {
-    val appOrSiteCleaned = cleanAppOrSite(df)
-    val oscleaned = cleanOS(appOrSiteCleaned)
-    val sizeCleaned = cleanSize(oscleaned)
-    val publishCleaned = cleanPublisher(sizeCleaned)
-    val typeCleaned = cleanType(publishCleaned)
-    val userCleaned = cleanUser(typeCleaned)
-    val labelCleaned = cleanLabel(userCleaned)
-    val bidfloorCleaned = cleanBidfloor(labelCleaned)
-    bidfloorCleaned
+    var newdf = df
+    newdf = cleanNullableValues(newdf)
+    newdf = cleanAppOrSite(newdf)
+    newdf = cleanOS(newdf)
+    newdf = cleanSize(newdf)
+    newdf = cleanPublisher(newdf)
+    newdf = cleanType(newdf)
+    newdf = cleanUser(newdf)
+    newdf = cleanLabel(newdf)
+    newdf
+  }
+
+  def cleanNullableValues(df: DataFrame): DataFrame = {
+    var noNullDF = df.na.fill(-1, Seq("appOrSite"))
+    noNullDF = noNullDF.na.fill("N/A", Seq("os"))
+    noNullDF = noNullDF.na.fill("N/A", Seq("size"))
+    noNullDF = noNullDF.na.fill("N/A", Seq("publisher"))
+    noNullDF = noNullDF.na.fill("N/A", Seq("type"))
+    noNullDF = noNullDF.na.fill(0, Seq("bidfloor"))
+    noNullDF
   }
 
 //  ==== Cleaning process for appOrSite Column ====
@@ -25,8 +36,9 @@ object ETL {
       else if (appOrSite == "site") 0.0
       else -1.0
     }
-    val appOrSiteCleaned = transformUDF(df.col("appOrSite"))
-    val newDataFrame = df.withColumn("appOrSite", appOrSiteCleaned)
+
+    val newdf = transformUDF(df.col("appOrSite"))
+    val newDataFrame = df.withColumn("appOrSite", newdf)
     newDataFrame
   }
 
@@ -47,20 +59,20 @@ object ETL {
       else if (os.toLowerCase().contains("webos")) "webos"
       else if (os.toLowerCase().contains("blackberry")) "blackberry"
       else if (os.toLowerCase() == "other" || os.toLowerCase() == "Unknown")
-        "unknown"
-      else "unknown"
+        "N/A"
+      else if (os == null) "N/A"
+      else "N/A"
     }
-
     val osCleaned = transformUDF(df.col("os"))
     val newDataFrame = df.withColumn("os", osCleaned)
     newDataFrame
   }
 
-  // Transform all null in "unknown" or size column
+  // Transform all null in "N/A" or size column
   def cleanSize(df: DataFrame): DataFrame = {
 
     val transformUDF = udf { size: String =>
-      if (size == "null") "unknown"
+      if (size == "null") "N/A"
       else size
     }
 
@@ -68,28 +80,28 @@ object ETL {
     casted.withColumn("size", transformUDF(casted.col("size")))
   }
 
-  // Transform all null in "unknown" or publisher column
+  // Transform all null in "N/A" or publisher column
   def cleanPublisher(df: DataFrame): DataFrame = {
     val transformUDF = udf { publisher: String =>
-      if (publisher == "null") "unknown"
+      if (publisher == "null") "N/A"
       else publisher
     }
     df.withColumn("publisher", transformUDF(df.col("publisher")))
   }
 
-  // Transform all null in "unknown" for type column
+  // Transform all null in "N/A" for type column
   def cleanType(df: DataFrame): DataFrame = {
     val transformUDF = udf { elem: String =>
-      if (elem == null) "unknown"
+      if (elem == "null") "N/A"
       else elem
     }
     df.withColumn("type", transformUDF(df.col("type")))
   }
 
-  // Transform all null in "unknown" for user column
+  // Transform all null in "N/A" for user column
   def cleanUser(df: DataFrame): DataFrame = {
     val transformUDF = udf { user: String =>
-      if (user == null) "unknown"
+      if (user == "null") "N/A"
       else user
     }
     df.withColumn("user", transformUDF(df.col("user")))
@@ -101,9 +113,5 @@ object ETL {
       else 0.0
     }
     df.withColumn("label", transformUDF(df.col("label")))
-  }
-
-  def cleanBidfloor(df: DataFrame): DataFrame = {
-    df.na.fill(0, Seq("bidfloor"))
   }
 }

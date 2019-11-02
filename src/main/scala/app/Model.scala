@@ -17,8 +17,21 @@ object Model {
     // We create a column with all the ratio for each line
     val dfWithRatio = df.withColumn("ratio", createRatioColumn(df))
 
-
-    val dfWithIndexed: DataFrame = indexStringColumns(dfWithRatio, List("appOrSite", "os", "network", "exchange", "interests", "media", "publisher", "size", "type", "user"))
+    val dfWithIndexed: DataFrame = indexStringColumns(
+      dfWithRatio,
+      List(
+        "appOrSite",
+        "os",
+        "network",
+        "exchange",
+        "interests",
+        "media",
+        "publisher",
+        "size",
+        "type",
+        "user"
+      )
+    )
 
     // Create a vector with our values  :
     val vector: VectorAssembler = new VectorAssembler()
@@ -68,6 +81,16 @@ object Model {
     println(
       s"Coefficients: ${logReg.coefficients} Intercept: ${logReg.intercept}"
     )
+
+    val evaluator: BinaryClassificationEvaluator =
+      new BinaryClassificationEvaluator()
+        .setMetricName("areaUnderROC")
+        .setRawPredictionCol("rawPrediction")
+        .setLabelCol("label")
+
+    // We evaluate and print out metrics, like our model accuracy
+    val eval: Double = evaluator.evaluate(predictions)
+    println("Test set areaunderROC/accuracy = " + eval)
   }
 
   // Check the value of ratio of true values
@@ -87,12 +110,14 @@ object Model {
     transformUDF(df.col("label"))
   }
 
-
   def indexStringColumns(df: DataFrame, cols: List[String]): DataFrame = {
     var newdf = df
 
     cols.foreach { col =>
-      val si = new StringIndexer().setInputCol(col).setOutputCol(col + "Indexed").setHandleInvalid("keep")
+      val si = new StringIndexer()
+        .setInputCol(col)
+        .setOutputCol(col + "Indexed")
+        .setHandleInvalid("keep")
 
       val sm: StringIndexerModel = si.fit(newdf)
       val indexed = sm.transform(newdf).drop(col)

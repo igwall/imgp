@@ -12,17 +12,16 @@ object Launcher extends App {
       .master("local[*]")
       .appName("imgp")
       .getOrCreate()
+  spark.sparkContext.setLogLevel("ERROR")
 
   // EXtract all datas for learning
-  val rawData: DataFrame = spark.read.json("src/data/small.json")
+  val rawData: DataFrame = spark.read.json("src/data/data-students.json")
 
   // ETL PROCESS
   val newDf = ETL.cleaningProcess(rawData)
-
   // ===== Create the model : =====
 
   // Calc the ratio for each label :
-  // val model = new Model(newDf)
   Model.createModel(newDf)
   spark.close()
 
