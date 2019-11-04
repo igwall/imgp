@@ -3,7 +3,10 @@ package app
 import org.apache.spark.sql.{DataFrame, Row, SQLContext, SparkSession}
 import org.apache.spark.sql.functions.udf
 import org.apache.spark.ml.feature.StringIndexer
+import org.apache.spark.sql.functions.regexp_replace
 import org.apache.spark.sql.types.IntegerType
+import org.apache.parquet.filter2.predicate.Operators.Column
+
 object ETL {
 
   def cleaningProcess(df: DataFrame, training: Boolean): DataFrame = {
@@ -14,6 +17,7 @@ object ETL {
     newdf = cleanSize(newdf)
     newdf = cleanPublisher(newdf)
     newdf = cleanType(newdf)
+    newdf = cleanInterest(newdf)
     newdf = cleanUser(newdf)
     if (training) {
       newdf = cleanLabel(newdf)
@@ -29,6 +33,7 @@ object ETL {
     noNullDF = noNullDF.na.fill("N/A", Seq("publisher"))
     noNullDF = noNullDF.na.fill("N/A", Seq("type"))
     noNullDF = noNullDF.na.fill(0, Seq("bidfloor"))
+    noNullDF = noNullDF.na.fill("N/A", Seq("interests"))
     noNullDF
   }
 
@@ -81,6 +86,26 @@ object ETL {
 
     val casted = df.withColumn("size", df("size").cast("string"))
     casted.withColumn("size", transformUDF(casted.col("size")))
+  }
+
+  // Clean all subcatégories
+  // Clean catégories that are not IAB like
+  def cleanInterest(df: DataFrame): DataFrame = {
+
+    val transformUDF = udf { interest: String =>
+      val splitted = interest.split(",")
+      splitted.filter(_.contains("IAB")).mkString(",")
+    }
+
+    val interestColumn = cleanSubCategories(df.col("interests"))
+    df.withColumn("interests", transformUDF(interestColumn))
+
+  }
+
+  def cleanSubCategories(
+      col: org.apache.spark.sql.Column
+  ): org.apache.spark.sql.Column = {
+    regexp_replace(col, "-[0-9]", "")
   }
 
   // Transform all null in "N/A" or publisher column

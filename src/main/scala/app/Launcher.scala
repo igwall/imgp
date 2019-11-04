@@ -22,7 +22,7 @@ object Launcher extends App {
   // ===== Create the model : =====
 
   // Calc the ratio for each label :
-  Model.createModel(newDf)
+  LogisticModel.createModel(newDf)
   spark.close()
 
 }
