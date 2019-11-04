@@ -96,41 +96,10 @@ object ETL {
       val splitted = interest.split(",")
       splitted.filter(_.contains("IAB")).mkString(",")
     }
-    val addColIAB = (num: Int, col: org.apache.spark.sql.Column) => {
-      val addColUdf = udf { interest: String =>
-        if (interest.contains(s"IAB$num")) 1.0
-        else 0.0
-      }
-      addColUdf(col)
-    }
+
     val interestColumn = cleanSubCategories(df.col("interests"))
-    val cleaned = df.withColumn("interests", transformUDF(interestColumn))
-    val IAB1 = cleaned.withColumn("interest-IAB1", addColIAB(1, cleaned("interests")))
-    val IAB2 =  IAB1  .withColumn("interest-IAB2", addColIAB(2, IAB1("interests")))
-    val IAB3 =  IAB2  .withColumn("interest-IAB3", addColIAB(3, IAB2("interests")))
-    val IAB4 =  IAB3  .withColumn("interest-IAB4", addColIAB(4, IAB3("interests")))
-    val IAB5 =  IAB4  .withColumn("interest-IAB5", addColIAB(5, IAB4("interests")))
-    val IAB6 =  IAB5  .withColumn("interest-IAB6", addColIAB(6, IAB5("interests")))
-    val IAB7 =  IAB6  .withColumn("interest-IAB7", addColIAB(7, IAB6("interests")))
-    val IAB8 =  IAB7  .withColumn("interest-IAB8", addColIAB(8, IAB7("interests")))
-    val IAB9 =  IAB8  .withColumn("interest-IAB9", addColIAB(9, IAB8("interests")))
-    val IAB10 = IAB9  .withColumn("interest-IAB10", addColIAB(10, IAB9("interests")))
-    val IAB11 = IAB10.withColumn("interest-IAB11", addColIAB(11, IAB10("interests")))
-    val IAB12 = IAB11.withColumn("interest-IAB12", addColIAB(12, IAB11("interests")))
-    val IAB13 = IAB12.withColumn("interest-IAB13", addColIAB(13, IAB12("interests")))
-    val IAB14 = IAB13.withColumn("interest-IAB14", addColIAB(14, IAB13("interests")))
-    val IAB15 = IAB14.withColumn("interest-IAB15", addColIAB(15, IAB14("interests")))
-    val IAB16 = IAB15.withColumn("interest-IAB16", addColIAB(16, IAB15("interests")))
-    val IAB17 = IAB16.withColumn("interest-IAB17", addColIAB(17, IAB16("interests")))
-    val IAB18 = IAB17.withColumn("interest-IAB18", addColIAB(18, IAB17("interests")))
-    val IAB19 = IAB18.withColumn("interest-IAB19", addColIAB(19, IAB18("interests")))
-    val IAB20 = IAB19.withColumn("interest-IAB20", addColIAB(20, IAB19("interests")))
-    val IAB21 = IAB20.withColumn("interest-IAB21", addColIAB(21, IAB20("interests")))
-    val IAB22 = IAB21.withColumn("interest-IAB22", addColIAB(22, IAB21("interests")))
-    val IAB23 = IAB22.withColumn("interest-IAB23", addColIAB(23, IAB22("interests")))
-    val IAB24 = IAB23.withColumn("interest-IAB24", addColIAB(24, IAB23("interests")))
-    val IAB25 = IAB24.withColumn("interest-IAB25", addColIAB(25, IAB24("interests")))
-                IAB25.withColumn("interest-IAB26", addColIAB(26, IAB25("interests")))
+    df.withColumn("interests", transformUDF(interestColumn))
+
   }
 
   def cleanSubCategories(

@@ -17,7 +17,6 @@ object LogisticModel {
 
     // We create a column with all the ratio for each line
     val dfWithRatio = balanceDataset(df)
-    // df.show()
 
     val dfWithIndexed: DataFrame = indexStringColumns(
       dfWithRatio,
@@ -31,8 +30,7 @@ object LogisticModel {
         "publisher",
         "size",
         "type",
-        "user",
-        "city"
+        "user"
       )
     )
 
@@ -40,44 +38,16 @@ object LogisticModel {
     val vector: VectorAssembler = new VectorAssembler()
       .setInputCols(
         Array(
-          "bidfloor",
           "appOrSiteIndexed",
           "osIndexed",
           "networkIndexed",
           "exchangeIndexed",
-          // "interestsIndexed",
+          "interestsIndexed",
           "mediaIndexed",
           "publisherIndexed",
           "sizeIndexed",
           "typeIndexed",
-          "userIndexed",
-          "cityIndexed",
-          "interest-IAB1",
-          "interest-IAB2",
-          "interest-IAB3",
-          "interest-IAB4",
-          "interest-IAB5",
-          "interest-IAB6",
-          "interest-IAB7",
-          "interest-IAB8",
-          "interest-IAB9",
-          "interest-IAB10",
-          "interest-IAB11",
-          "interest-IAB12",
-          "interest-IAB13",
-          "interest-IAB14",
-          "interest-IAB15",
-          "interest-IAB16",
-          "interest-IAB17",
-          "interest-IAB18",
-          "interest-IAB19",
-          "interest-IAB20",
-          "interest-IAB21",
-          "interest-IAB22",
-          "interest-IAB23",
-          "interest-IAB24",
-          "interest-IAB25",
-          "interest-IAB26"
+          "userIndexed"
         )
       )
       .setOutputCol("features")
