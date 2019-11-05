@@ -30,7 +30,8 @@ object LogisticModel {
         "publisher",
         "size",
         "type",
-        "user"
+        "user",
+        "city"
       )
     )
 
@@ -47,7 +48,9 @@ object LogisticModel {
           "publisherIndexed",
           "sizeIndexed",
           "typeIndexed",
-          "userIndexed"
+          "userIndexed",
+          "cityIndexed",
+          "bidfloor"
         )
       )
       .setOutputCol("features")

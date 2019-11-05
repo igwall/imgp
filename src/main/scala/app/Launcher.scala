@@ -15,7 +15,7 @@ object Launcher extends App {
   spark.sparkContext.setLogLevel("ERROR")
 
   // EXtract all datas for learning
-  val rawData: DataFrame = spark.read.json("src/data/data-students.json")
+  val rawData: DataFrame = spark.read.json("src/data/medium.json")
 
   // ETL PROCESS
   val newDf = ETL.cleaningProcess(rawData, true)
