@@ -7,6 +7,7 @@ import org.apache.spark.sql.functions.udf
 
 object Launcher extends App {
   // Load data here :
+
   val spark =
     SparkSession.builder
       .config("spark.master", "local")
@@ -15,7 +16,7 @@ object Launcher extends App {
   spark.sparkContext.setLogLevel("ERROR")
 
   // EXtract all datas for learning
-  val rawData: DataFrame = spark.read.json("src/data/medium.json")
+  val rawData: DataFrame = spark.read.json("src/data/data-students.json")
 
   // ETL PROCESS
   val newDf = ETL.cleaningProcess(rawData, true)
@@ -23,6 +24,7 @@ object Launcher extends App {
 
   // Calc the ratio for each label :
   LogisticModel.createModel(newDf)
+
   spark.close()
 
 }

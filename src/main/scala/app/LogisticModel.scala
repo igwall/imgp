@@ -4,11 +4,13 @@ import org.apache.spark.sql.functions.udf
 import org.apache.spark.sql.functions._
 import org.apache.spark.ml.{Pipeline, PipelineModel}
 import org.apache.spark.ml.evaluation.BinaryClassificationEvaluator
+import org.apache.spark.mllib.evaluation.MulticlassMetrics
 import org.apache.spark.ml.classification.{
   LogisticRegression,
   LogisticRegressionModel,
   BinaryLogisticRegressionSummary
 }
+import org.apache.spark.ml.linalg.Vectors
 import org.apache.spark.ml.feature._
 
 object LogisticModel {
@@ -57,7 +59,7 @@ object LogisticModel {
 
     // WE split our DF for training
     val splitDataFrame: Array[DataFrame] =
-      dfWithIndexed.randomSplit(Array(0.8, 0.2)) // Need to be confirmed ?
+      dfWithIndexed.randomSplit(Array(0.8, 0.2),123L) // Need to be confirmed ?
     var training: DataFrame = splitDataFrame(0)
     var testing: DataFrame = splitDataFrame(1)
 
@@ -65,7 +67,7 @@ object LogisticModel {
       .setWeightCol("classWeightCol")
       .setLabelCol("label")
       .setFeaturesCol("features")
-      .setMaxIter(10)
+      .setMaxIter(100)
 
     val stages = Array(vector, logisticRegression)
 
@@ -86,18 +88,16 @@ object LogisticModel {
     val summary = logReg.summary
     val binarySummary = summary.asInstanceOf[BinaryLogisticRegressionSummary]
 
-    val roc = binarySummary.roc
-    println(s"areaUnderROC: ${binarySummary.areaUnderROC}")
-
-    val evaluator: BinaryClassificationEvaluator =
-      new BinaryClassificationEvaluator()
-        .setMetricName("areaUnderROC")
-        .setRawPredictionCol("rawPrediction")
-        .setLabelCol("label")
-
-    // We evaluate and print out metrics, like our model accuracy
-    val eval: Double = evaluator.evaluate(predictions)
-    println("Test set areaunderROC/accuracy = " + eval)
+    val predictionAndLabels = predictions
+      .select("prediction", "label")
+      .rdd
+      .map(x => (x.get(0).asInstanceOf[Double], x.get(1).asInstanceOf[Double]))
+    val metrics = new MulticlassMetrics(predictionAndLabels)
+    println(s"Weighted precision= ${metrics.weightedPrecision}")
+    println(s"Weighted recall= ${metrics.weightedRecall}")
+    println("Confusion matrix:")
+    println(metrics.confusionMatrix)
+    //println("Test set areaunderROC/accuracy = " + eval)
     //println("Test set areaunderROC/accuracy = " + eval)
   }
 
