@@ -142,4 +142,12 @@ object ETL {
     }
     df.withColumn("label", transformUDF(df.col("label")))
   }
+
+  def uncleanLabel(df:DataFrame) : DataFrame = {
+    val transformUDF = udf { label: Double =>
+      if (label == 1.0) true
+      else false
+    }
+    df.withColumn("label", transformUDF(df.col("label")))
+  }
 }
