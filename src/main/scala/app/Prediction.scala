@@ -87,7 +87,7 @@ object Prediction {
       .write
       .format("csv")
       .option("header", "true")
-      .save("./predictions/prediction.csv")
+      .save("./predictions/")
 
     spark.close()
 
