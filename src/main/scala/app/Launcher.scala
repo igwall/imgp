@@ -22,7 +22,9 @@ object Launcher {
             .appName("imgp")
             .getOrCreate()
          //EXtract all datas for learning
-        val rawData: DataFrame = spark.read.json("src/data/small.json")
+        println("\nPlease enter the path of the JSON file that you want to predict")
+        val filePath: String = readLine().trim()
+        val rawData: DataFrame = spark.read.json(filePath)
 
          //ETL PROCESS
         val newDf = ETL.cleaningProcess(rawData, true)
