@@ -5,7 +5,6 @@ import org.apache.spark.SparkConf
 import org.apache.spark.sql.{DataFrame, Row, SQLContext, SparkSession}
 import org.apache.spark.sql.functions.udf
 import java.io.File
-//import org.apache.spark.mllib.stat.{MultivariateStatisticalSummary, Statistics}
 
 object Launcher {
 
@@ -21,16 +20,16 @@ object Launcher {
             .config("spark.master", "local")
             .appName("imgp")
             .getOrCreate()
-         //EXtract all datas for learning
+        
+        //EXtract all datas for learning
         println("\nPlease enter the path of the JSON file that you want to predict")
         val filePath: String = readLine().trim()
         val rawData: DataFrame = spark.read.json(filePath)
 
-         //ETL PROCESS
+        //ETL PROCESS
         val newDf = ETL.cleaningProcess(rawData, true)
-         //===== Create the model : =====
 
-         //Calc the ratio for each label :
+        // Create the model with a logistic regression
         LogisticModel.createModel(newDf)
 
         spark.close()
