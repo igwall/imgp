@@ -1,8 +1,10 @@
 ## IMGP Makes Good Prediction - Click prediction project
 
 ### Clone the project : 
-`git clone https://github.com/igwall/imgp.git`
-`cd imgp`
+```
+git clone https://github.com/igwall/imgp.git
+cd imgp
+```
 
 ### Requirement 
 
